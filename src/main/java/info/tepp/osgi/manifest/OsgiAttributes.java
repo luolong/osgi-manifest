@@ -4,6 +4,67 @@ import java.util.jar.Attributes;
 
 public class OsgiAttributes extends Attributes {
 
+    /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Name Bundle-Name} attribute.
+     */
+    public String getBundleName() {
+        return getValue(Name.Bundle_Name);
+    }
+
+    /**
+     * Sets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Name Bundle-Name} attribute.
+     */
+    public void setBundleName(String name) {
+        put(Name.Bundle_Name, name);
+    }
+
+    /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_ContactAddress
+     * Bundle-ContactAddress} attribute.
+     */
+    public String getBundleContactAddress() {
+        return getValue(Name.Bundle_ContactAddress);
+    }
+
+    /**
+     * Sets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_ContactAddress
+     * Bundle-ContactAddress} attribute.
+     */
+    public void setBundleContactAddress(String contactAddress) {
+        put(Name.Bundle_ContactAddress, contactAddress);
+    }
+
+    /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Copyright
+     * Bundle-Copyright} attribute.
+     */
+    public String getBundleCopyright() {
+        return getValue(Name.Bundle_Copyright);
+    }
+
+    /**
+     * Sets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Copyright
+     * Bundle-Copyright} attribute.
+     */
+    public void setBundleCopyright(String copyright) {
+        put(Name.Bundle_Copyright, copyright);
+    }
+
+    public String getBundleDescription() {
+        return getValue(Name.Bundle_Description);
+    }
+
+    public void setBundleDescription(String description) {
+        put(Name.Bundle_Description, description);
+    }
+
+    public String getBundleVendor() {
+        return getValue(Name.Bundle_Vendor);
+    }
+
+    public void setBundleVendor(String vendor) {
+        put(Name.Bundle_Vendor, vendor);
+    }
 
     /**
      * Represents name of an OSGi attribute.
@@ -335,45 +396,46 @@ public class OsgiAttributes extends Attributes {
          */
         public static final Name Require_Capability = new Name("Require-Capability");
 
-
-
         /*
          * Eclipse Foundation namespace header names.
          * ========================================== */
 
+
+
         public static final Name Eclipse_BuddyPolicy    = new Name("Eclipse-BuddyPolicy");
+
         public static final Name Eclipse_BundleShape    = new Name("Eclipse-BundleShape");
         public static final Name Eclipse_ExtensibleAPI  = new Name("Eclipse-ExtensibleAPI");
         public static final Name Eclipse_PlatformFilter = new Name("Eclipse-PlatformFilter");
         public static final Name Eclipse_RegisterBuddy  = new Name("Eclipse-RegisterBuddy");
-
-
-
         /*
          * SpringSource namespace header names.
          * ==================================== */
 
+
+
         public static final Name Import_Bundle                    = new Name("Import-Bundle");
+
         public static final Name Import_Library                   = new Name("Import-Library");
         public static final Name Module_Scope                     = new Name("Module-Scope");
         public static final Name Module_Type                      = new Name("Module-Type");
         public static final Name Web_ContextPath                  = new Name("Web-ContextPath");
         public static final Name Web_DispatcherServletUrlPatterns = new Name("Web-DispatcherServletUrlPatterns");
         public static final Name Web_FilterMappings               = new Name("Web-FilterMappings");
-
         /*
          * aQute namespace header names.
          * ==================================== */
 
         public static final Name Include_Resource               = new Name("Include-Resource");
 
-
         public Name(String s) {
             super(s);
         }
-    }
 
+
+    }
     public OsgiAttributes() {
+        super();
     }
 
     public OsgiAttributes(int i) {
@@ -382,5 +444,10 @@ public class OsgiAttributes extends Attributes {
 
     public OsgiAttributes(Attributes attributes) {
         super(attributes);
+    }
+
+    /** Typesafe put operation */
+    public String put(OsgiAttributes.Name name, String value) {
+        return (String) super.put(name, value);
     }
 }
