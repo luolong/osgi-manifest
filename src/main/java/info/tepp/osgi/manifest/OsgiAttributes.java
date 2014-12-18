@@ -50,18 +50,34 @@ public class OsgiAttributes extends Attributes {
         put(Name.Bundle_Copyright, copyright);
     }
 
+    /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Description
+     * Bundle-Description} attribute.
+     */
     public String getBundleDescription() {
         return getValue(Name.Bundle_Description);
     }
 
+    /**
+     * Gets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Description
+     * Bundle-Description} attribute.
+     */
     public void setBundleDescription(String description) {
         put(Name.Bundle_Description, description);
     }
 
+    /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Vendor
+     * Bundle-Vendor} attribute.
+     */
     public String getBundleVendor() {
         return getValue(Name.Bundle_Vendor);
     }
 
+    /**
+     * Sets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Vendor
+     * Bundle-Vendor} attribute.
+     */
     public void setBundleVendor(String vendor) {
         put(Name.Bundle_Vendor, vendor);
     }
