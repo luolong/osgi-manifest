@@ -1,7 +1,9 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.5
 version = '1.0'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 task wrapper(type: Wrapper) {
   gradleVersion = '1.9'
@@ -14,5 +16,7 @@ repositories {
 
 dependencies {
     compile 'org.osgi:org.osgi.core:4.3.0'
+
     testCompile 'junit:junit:4.11'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
 }
