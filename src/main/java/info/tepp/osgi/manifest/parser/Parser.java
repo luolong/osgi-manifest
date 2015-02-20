@@ -1,5 +1,11 @@
 package info.tepp.osgi.manifest.parser;
 
+import info.tepp.osgi.manifest.parser.Result.Failure;
+import info.tepp.osgi.manifest.parser.Result.Success;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /**
  * Very simple <a href="http://en.wikipedia.org/wiki/Parser_combinator">parser combinator</a>
  * library for parsing OSGi bundle manifest header values.
@@ -11,67 +17,30 @@ public abstract class Parser<T> {
      */
     public abstract Result<T> parse(CharSequence input);
 
-    /** Parses positive integer numbers tokens */
-    public static final IntegerParser NUMBER = new IntegerParser();
-    public static final class IntegerParser extends Parser<Integer> {
+    /** Parses positive integer numbers */
+    public static final Parser<Integer> NUMBER = Token.NUMBER.as(Integer.class);
+
+    /**
+     * Greedily parses rest of the input.
+     */
+    public static final Parser<String> REST = new RestParser();
+    private static class RestParser extends Parser<String> {
         @Override
-        public Result<Integer> parse(CharSequence input) {
-            // Heavily inspired from JDK Integer.parseInt method
-            if (input == null) return Result.Failure.of("null").asResult();
-
-            int length = input.length();
-            if (length <= 0) return Result.Failure.of("empty").asResult();
-
-            int radix = 10;
-
-            int result = 0;
-            int index = 0;
-
-            int limit = -Integer.MAX_VALUE;
-            int multmin = limit / radix;
-            int digit;
-
-            while (index < length) {
-                // Accumulating negatively avoids surprises near MAX_VALUE
-                digit = Character.digit(input.charAt(index++), radix);
-                if (digit < 0)
-                    if (index <= 1) return Result.Failure.of("NaN: " + input.subSequence(0, index)).asResult();
-                    else { index -= 1; break; }
-
-                if (result < multmin)
-                    return Result.Failure.of("Number too large: " + input.subSequence(0, index)).asResult();
-
-                result *= radix;
-                if (result < limit + digit)
-                    return Result.Failure.of("Number too large: " + input.subSequence(0, index)).asResult();
-
-                result -= digit;
-            }
-
-            return Result.Success.of(-result, input.subSequence(index, length));
+        public Result<String> parse(CharSequence input) {
+            return Success.of(input.toString(), "");
         }
     }
 
-    /** Parses a single dot character (i.e. '.') */
-    public static final CharacterParser DOT = new CharacterParser('.');
-    public static final class CharacterParser extends Parser<Character> {
-        private final char ch;
-        public CharacterParser(char ch) { this.ch = ch; }
-
+    public static final Parser<Void> EOF = new Parser<Void>() {
         @Override
-        public Result<Character> parse(CharSequence input) {
-            if (input == null) return Result.Failure.of("null").asResult();
+        @SuppressWarnings("unchecked")
+        public Result<Void> parse(CharSequence input) {
+            if (input.length() > 0)
+                return Failure.of("EOF Expected, but got '" + input + "'!");
 
-            int length = input.length();
-            if (length == 0) return Result.Failure.of("empty").asResult();
-
-            char c0 = input.charAt(0);
-            if (c0  == ch)
-                return new Result.Success<Character>(c0, input.subSequence(1, length));
-
-            return Result.Failure.of(String.format("Expexted '%s', but got '%s'", ch, c0)).asResult();
+            return Success.of(null, "");
         }
-    }
+    };
 
     /**
      * Returns a parser that combines <i>this</i> and then the <i>other</i> parser,
@@ -80,7 +49,6 @@ public abstract class Parser<T> {
     public <O> TupleSequenceParser<T, O> then(Parser<O> other) {
         return new TupleSequenceParser<T, O>(this, other);
     }
-
     public static final class TupleSequenceParser<L, R> extends Parser<Tuple.Tuple2<L, R>> {
         private final Parser<L> left;
         private final Parser<R> right;
@@ -93,19 +61,41 @@ public abstract class Parser<T> {
         @Override
         public Result<Tuple.Tuple2<L, R>> parse(CharSequence input) {
             Result<L> leftResult = left.parse(input);
-            if (leftResult instanceof Result.Failure) {
-                return ((Result.Failure) leftResult).asResult();
+            if (leftResult instanceof Failure) {
+                return ((Failure) leftResult).asResult();
             }
 
-            Result.Success<L> leftSuccess = (Result.Success<L>) leftResult;
+            Success<L> leftSuccess = (Success<L>) leftResult;
             Result<R> rightResult = right.parse(leftSuccess.rest);
-            if (rightResult instanceof Result.Failure) {
-                return ((Result.Failure) rightResult).asResult();
+            if (rightResult instanceof Failure) {
+                return ((Failure) rightResult).asResult();
             }
 
-            Result.Success<R> rightSuccess = (Result.Success<R>) rightResult;
-            return Result.Success.of(leftSuccess.value, rightSuccess.value,
+            Success<R> rightSuccess = (Success<R>) rightResult;
+            return Success.of(leftSuccess.value, rightSuccess.value,
                     rightSuccess.rest);
+        }
+
+        public <T> Parser<T> as(final BiFunction<L, R, T> func) {
+            final TupleSequenceParser<L, R> parser = this;
+            return new Parser<T>() {
+                @Override
+                public Result<T> parse(CharSequence input) {
+                    Result<Tuple.Tuple2<L, R>> result = parser.parse(input);
+                    if (result instanceof Failure) {
+                        return ((Failure) result).asResult();
+                    }
+
+                    Success<Tuple.Tuple2<L, R>> success = (Success<Tuple.Tuple2<L, R>>) result;
+                    try {
+                        Tuple.Tuple2<L, R> tuple = success.value;
+                        return Success.of(func.apply(tuple.left, tuple.right), success.rest);
+                    }
+                    catch (Throwable t) {
+                        return Failure.of("Conversion failure: " + t.getMessage(), t).asResult();
+                    }
+                }
+            };
         }
     }
 
@@ -125,11 +115,35 @@ public abstract class Parser<T> {
         @Override
         public Result<Maybe<T>> parse(CharSequence input) {
             Result<T> result = parser.parse(input);
-            if (result instanceof Result.Success) {
-                Result.Success<T> success = (Result.Success<T>) result;
-                return Result.Success.of(Maybe.Some(success.value), success.rest);
+            if (result instanceof Success) {
+                Success<T> success = (Success<T>) result;
+                return Success.of(Maybe.Some(success.value), success.rest);
             }
-            return Result.Success.of(Maybe.<T>None(), input);
+            return Success.of(Maybe.<T>None(), input);
+        }
+
+        public <R> OptionalParser<R> as(final Function<T, R> func) {
+            final OptionalParser<T> optional = this;
+            return new OptionalParser<R>(null) {
+                @Override
+                public Result<Maybe<R>> parse(CharSequence input) {
+                    Result<Maybe<T>> result = optional.parse(input);
+                    Success<Maybe<T>> maybe = (Success<Maybe<T>>) result;
+                    return Success.of(maybe.value.map(func), maybe.rest);
+                }
+            };
+        }
+
+        public Parser<T> orElse(final T value) {
+            final OptionalParser<T> parser = this;
+            return new Parser<T>() {
+                @Override
+                public Result<T> parse(CharSequence input) {
+                    Result<Maybe<T>> result = parser.parse(input);
+                    Success<Maybe<T>> maybe = (Success<Maybe<T>>) result;
+                    return Success.of(maybe.value.orElse(value), maybe.rest);
+                }
+            };
         }
     }
 
@@ -142,12 +156,38 @@ public abstract class Parser<T> {
             @Override
             public Result<R> parse(CharSequence input) {
                 Result<T> result = parser.parse(input);
-                if (result instanceof Result.Failure) {
-                    return ((Result.Failure) result).asResult();
+                if (result instanceof Failure) {
+                    return ((Failure) result).asResult();
                 }
 
-                Result.Success<T> success = (Result.Success<T>) result;
-                return Result.Success.of(func.apply(success.value), success.rest);
+                Success<T> success = (Success<T>) result;
+                try {
+                    return Success.of(func.apply(success.value), success.rest);
+                }
+                catch (Throwable t) {
+                    return failureOf(t).asResult();
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            private Failure failureOf(Throwable t) {
+                Class<? extends Throwable> type = t.getClass();
+                while (type != null) {
+                    try {
+                        Method method = func.getClass().getDeclaredMethod("failureOf", type);
+                        if (Failure.class.isAssignableFrom(method.getReturnType())) {
+                            Object result = method.invoke(func, t);
+                            return Failure.class.cast(result);
+                        }
+                    }
+                    catch (NoSuchMethodException ignore) {}
+                    catch (InvocationTargetException ignore) {}
+                    catch (IllegalAccessException ignore) {}
+
+                    type = (Class<? extends Throwable>) type.getSuperclass();
+                }
+
+                return Failure.of(t.getMessage(), t);
             }
         };
     }
@@ -159,25 +199,8 @@ public abstract class Parser<T> {
         return parser.as(Tuple.<L, R>Right());
     }
 
-    /**
-     * Greedily parses rest of the input.
-     */
-    public static final Parser<String> REST = new RestParser();
-    private static class RestParser extends Parser<String> {
-        @Override
-        public Result<String> parse(CharSequence input) {
-            return Result.Success.of(input.toString(), "");
-        }
+    public Parser<T> thenEof() {
+        return then(EOF).as(Tuple.<T, Void>Left());
     }
 
-    public static final Parser<Void> EOF = new Parser<Void>() {
-        @Override
-        @SuppressWarnings("unchecked")
-        public Result<Void> parse(CharSequence input) {
-            if (input.length() > 0)
-                return Result.Failure.of("EOF Expected, but got '" + input + "");
-
-            return Result.Success.of(null, "");
-        }
-    };
 }

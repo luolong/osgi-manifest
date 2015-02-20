@@ -4,22 +4,26 @@ import info.tepp.osgi.manifest.parser.Result.Failure;
 import info.tepp.osgi.manifest.parser.Result.Success;
 import org.junit.Test;
 
-import static info.tepp.osgi.manifest.parser.Parser.DOT;
 import static info.tepp.osgi.manifest.parser.Parser.NUMBER;
 import static org.junit.Assert.assertEquals;
 
 public class TransformingParserTest {
 
+    Parser<Integer> parser = Token.Char('.').then(NUMBER).as(Tuple.<String, Integer>Right());
+
     @Test
     public void successfullyTransformsSuccessValue(){
-        Parser<Integer> parser = DOT.then(NUMBER).as(Tuple.<Character, Integer>Right());
         assertEquals(Success.of(3, ".rest"), parser.parse(".3.rest"));
     }
 
     @Test
     public void transitivelyFails(){
-        Parser<Integer> parser = DOT.then(NUMBER).as(Tuple.<Character, Integer>Right());
-        assertEquals(Failure.of("NaN: ."), parser.parse("..rest"));
+        assertEquals(Failure.of("['0'..'9'] expected, but got '.'"), parser.parse("..rest"));
+    }
+
+    @Test
+    public void transitivelyFails2(){
+        assertEquals(Failure.of("'.' expected, but got '3'"), parser.parse("3.rest"));
     }
 
 }

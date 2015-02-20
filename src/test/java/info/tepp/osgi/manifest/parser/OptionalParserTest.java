@@ -10,13 +10,13 @@ public class OptionalParserTest {
 
     @Test
     public void parsesOptionalDotCharacter() {
-        OptionalParser<Character> parser = Maybe(Parser.DOT);
-        assertEquals(Result.Success.of(Maybe.Some('.'), "rest"), parser.parse(".rest"));
+        OptionalParser<String> parser = Maybe(Token.Char('.'));
+        assertEquals(Result.Success.of(Maybe.Some("."), "rest"), parser.parse(".rest"));
     }
 
     @Test
     public void parsesOptionalDotCharacter2() {
-        OptionalParser<Character> parser = Maybe(Parser.DOT);
+        OptionalParser<String> parser = Maybe(Token.Char('.'));
         assertEquals(Result.Success.of(Maybe.None(), "rest"), parser.parse("rest"));
     }
 

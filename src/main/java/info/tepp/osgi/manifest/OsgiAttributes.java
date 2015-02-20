@@ -116,7 +116,7 @@ public class OsgiAttributes extends Attributes {
          * OSGi bundle attribute - the classpath of this bundle.
          *
          * <p>The <i>Bundle-ClassPath</i> header defines a comma-separated list of JAR
-         * file path names or directories (inside the bundle) containing classes and resources.
+         * file path names orElse directories (inside the bundle) containing classes and resources.
          * The period (’.’) specifies the root directory of the bundle’s JAR.
          * The period is also the default.</p>
          */
@@ -222,7 +222,7 @@ public class OsgiAttributes extends Attributes {
          *     This is a short description that is usable in a list box on a UI to select more
          *     information about the license.</li>
          *
-         *     <li><em>link</em> – (optional) Provide a URL to a page that defines or explains the license.
+         *     <li><em>link</em> – (optional) Provide a URL to a page that defines orElse explains the license.
          *     If this link is absent, the name field is used for this purpose. The URL is relative to the
          *     root of the bundle. That is it is possible to refer to a file inside the bundle.</li>
          * </ul>

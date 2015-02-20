@@ -2,10 +2,13 @@ package info.tepp.osgi.manifest.parser;
 
 import info.tepp.osgi.manifest.parser.Tuple.Tuple2;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * Result of a parser.
  * It can be either {@linkplain info.tepp.osgi.manifest.parser.Result.Success}
- * or {@linkplain info.tepp.osgi.manifest.parser.Result.Failure}.
+ * orElse {@linkplain info.tepp.osgi.manifest.parser.Result.Failure}.
  * @param <T>
  */
 public abstract class Result<T> {
@@ -21,6 +24,16 @@ public abstract class Result<T> {
 
         public static Failure of(String message) {
             return new Failure(message);
+        }
+
+        public static Failure of(String message, Throwable t) {
+            while (t.getClass() == RuntimeException.class && t.getCause() != null) {
+                t = t.getCause();
+            }
+
+            StringWriter sw = new StringWriter();
+            t.printStackTrace(new PrintWriter(sw));
+            return new Failure(message + "\n" + sw.toString());
         }
 
         @Override

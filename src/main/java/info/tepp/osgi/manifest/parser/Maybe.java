@@ -1,7 +1,7 @@
 package info.tepp.osgi.manifest.parser;
 
 /**
- * Type that may have {@link Some some} value or {@link #None none}
+ * Type that may have {@link Some some} value orElse {@link #None none}
  */
 public abstract class Maybe<T> {
 
@@ -9,8 +9,8 @@ public abstract class Maybe<T> {
 
     /**
      * Maybe return {@link info.tepp.osgi.manifest.parser.Maybe.Some Some} value
-     * (or {@link #None}, if input is {@literal null})
-     * @param value value or {@literal null}
+     * (orElse {@link #None}, if input is {@literal null})
+     * @param value value orElse {@literal null}
      * @param <T> type of the value
      * @return Returns a value wrapped in instance of Some, if the value is not null;
      *    return None otherwise
@@ -36,7 +36,7 @@ public abstract class Maybe<T> {
         return (Maybe<T>) None;
     }
 
-    public abstract T or(T fallback);
+    public abstract T orElse(T fallback);
 
     /**
      * Some value of type T
@@ -69,7 +69,7 @@ public abstract class Maybe<T> {
         }
 
         @Override
-        public T or(T ignore) {
+        public T orElse(T ignore) {
             return value;
         }
 
@@ -101,7 +101,7 @@ public abstract class Maybe<T> {
         }
 
         @Override
-        public Object or(Object value) {
+        public Object orElse(Object value) {
             return value;
         }
 

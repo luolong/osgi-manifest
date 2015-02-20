@@ -111,6 +111,7 @@ public abstract class Tuple {
         public static <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4> normalize(Tuple2<T1, Tuple2<T2, Tuple2<T3, T4>>> tuple2) {
             return Tuple.of(tuple2.left, tuple2.right.left, tuple2.right.right.left, tuple2.right.right.right);
         }
+
     }
 
 

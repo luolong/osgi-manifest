@@ -1,14 +1,19 @@
 package info.tepp.osgi.manifest;
 
-import info.tepp.osgi.manifest.parser.Maybe;
-import info.tepp.osgi.manifest.parser.Parser;
-import info.tepp.osgi.manifest.parser.Result;
-import info.tepp.osgi.manifest.parser.Tuple;
+import info.tepp.osgi.manifest.parser.*;
+import info.tepp.osgi.manifest.parser.Result.Failure;
+import info.tepp.osgi.manifest.parser.Result.Success;
 import info.tepp.osgi.manifest.parser.Tuple.Tuple2;
+import info.tepp.osgi.manifest.parser.Tuple.Tuple4;
 
 import java.text.ParseException;
 
-import static info.tepp.osgi.manifest.parser.Parser.*;
+import static info.tepp.osgi.manifest.parser.Parser.Maybe;
+import static info.tepp.osgi.manifest.parser.Parser.Right;
+import static info.tepp.osgi.manifest.parser.Predicates.anyOf;
+import static info.tepp.osgi.manifest.parser.Token.AnyOf;
+import static info.tepp.osgi.manifest.parser.Token.Char;
+import static info.tepp.osgi.manifest.parser.Token.OneOrMore;
 
 public class Version implements Comparable<Version> {
 
@@ -77,34 +82,111 @@ public class Version implements Comparable<Version> {
     }
 
     public static Version parseVersion(String versionString) throws ParseException {
-        Parser<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>>>> parser;
-        parser = NUMBER.then(
-                Maybe(Right(DOT.then(NUMBER)).then(
-                        Maybe(Right(DOT.then(NUMBER)).then(
-                                Maybe(Right(DOT.then(REST)))
-                        ))
-                ))
-            ).then(EOF)
-             .as(Tuple.<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>>>, Void>Left());
+        Parser<Major> major = Token.NUMBER.as(Major.class);
+        Parser<Minor> minor = Token.NUMBER.as(Minor.class);
+        Parser<Micro> micro = Token.NUMBER.as(Micro.class);
+        return null;
+    }
 
-        Result<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>>>> result;
-        result = parser.parse(versionString);
-        if (result instanceof Result.Failure) {
-            throw new ParseException(((Result.Failure) result).message, -1);
+    public static final class Major extends Number {
+        public static Major valueOf(int intValue) {
+            return new Major(intValue);
+        }
+        public static Major valueOf(String string) {
+            return new Major(Integer.parseInt(string));
         }
 
-        Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>>> value;
-        value = ((Result.Success<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>>>>) result).value;
+        private final int value;
+        public Major(int value) {
+            this.value = value;
+        }
 
-        int major = value.left.intValue();
-        Maybe<Tuple2<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>> maybeMinor = value.right;
-        int minor = maybeMinor.map(Tuple.<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>Left()).or(0).intValue();
+        @Override
+        public int intValue() {
+            return value;
+        }
 
-        Maybe<Tuple2<Integer, Maybe<String>>> maybeMicro = maybeMinor
-                .flatMap(Tuple.<Integer, Maybe<Tuple2<Integer, Maybe<String>>>>Right());
-        int micro = maybeMicro.map(Tuple.<Integer, Maybe<String>>Left()).or(0).intValue();
+        @Override
+        public long longValue() {
+            return value;
+        }
 
-        Maybe<String> maybeQualifier = maybeMicro.flatMap(Tuple.<Integer, Maybe<String>>Right());
-        return new Version(major, minor, micro, maybeQualifier.or(""));
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    public static final class Minor extends Number {
+        public static Minor valueOf(int intValue) {
+            return new Minor(intValue);
+        }
+        public static Minor valueOf(String string) {
+            return new Minor(Integer.parseInt(string));
+        }
+
+        private final int value;
+        public Minor(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    public static final class Micro extends Number {
+        public static Micro valueOf(int intValue) {
+            return new Micro(intValue);
+        }
+        public static Micro valueOf(String string) {
+            return new Micro(Integer.parseInt(string));
+        }
+
+        private final int value;
+        public Micro(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
     }
 }
