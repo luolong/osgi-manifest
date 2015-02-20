@@ -1,6 +1,5 @@
 package info.tepp.osgi.manifest;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -40,13 +39,12 @@ public class VersionParserTest {
         assertEquals(new Version(1, 2, 3, "qualifier"), Version.parseVersion("1.2.3.qualifier"));
     }
 
-    @Test
+    @Test(expected = java.text.ParseException.class)
     public void itFailsToParseQualifierWithoutMicro() throws ParseException {
-        assertEquals(new Version(1, 2, 3, "qualifier"), Version.parseVersion("1.2.qualifier"));
+        Version.parseVersion("1.2.qualifier");
     }
 
-    @Test
-    @Ignore
+    @Test(expected = java.text.ParseException.class)
     public void itFailsToParseQualifierWithoutMinor() throws ParseException {
         assertEquals(new Version(1, 2, 3, "qualifier"), Version.parseVersion("1.qualifier"));
     }

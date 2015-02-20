@@ -4,12 +4,11 @@ import info.tepp.osgi.manifest.parser.Result.Failure;
 import info.tepp.osgi.manifest.parser.Result.Success;
 import org.junit.Test;
 
-import static info.tepp.osgi.manifest.parser.Parser.NUMBER;
 import static org.junit.Assert.assertEquals;
 
 public class TransformingParserTest {
 
-    Parser<Integer> parser = Token.Char('.').then(NUMBER).as(Tuple.<String, Integer>Right());
+    Parser<Integer> parser = Token.Char('.').then(Token.NUMBER.as(Integer.class)).as(Tuple.<String, Integer>Right());
 
     @Test
     public void successfullyTransformsSuccessValue(){

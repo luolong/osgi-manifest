@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     compile 'org.osgi:org.osgi.core:4.3.0'
+    compile 'com.google.code.findbugs:jsr305:3.0.0'
 
     testCompile 'junit:junit:4.11'
     testCompile 'org.hamcrest:hamcrest-library:1.3'

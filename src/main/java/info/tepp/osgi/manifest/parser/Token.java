@@ -13,7 +13,7 @@ import static info.tepp.osgi.manifest.parser.Predicates.*;
 
 public abstract class Token extends Parser<String> {
 
-    public static final Char WS = Char(Whitespace);
+    public static final Char WS = new Char(Whitespace);
 
     public static final Char DIGIT = Char(Digit);
 
@@ -51,12 +51,15 @@ public abstract class Token extends Parser<String> {
 
     public static final Token ATTRIBUTE = Sequence(EXTENDED, Char('='), ARGUMENT);
 
+    @SuppressWarnings("unused")
     public static final Token PARAMETER = AnyOf(DIRECTIVE, ATTRIBUTE);
 
     public static final Token UNIQUE_NAME = Sequence( IDENTIFIER , ZeroOrMore( Sequence( Char('.'), IDENTIFIER ) ) );
 
+    @SuppressWarnings("unused")
     public static final Token SYMBOLIC_NAME = Sequence( TOKEN, ZeroOrMore( Sequence( Char('.'), TOKEN ) ) );
 
+    @SuppressWarnings("unused")
     public static final Token PACKAGE_NAME = UNIQUE_NAME;
 
     public static final Token PATH_SEP = Char( '/' );
@@ -84,6 +87,7 @@ public abstract class Token extends Parser<String> {
                         return applyMethod(type, valueOf, input);
                     }
 
+                    @SuppressWarnings("unused")
                     public Failure failureOf(NumberFormatException e) {
                         String message = e.getMessage();
                         return Failure.of("Invalid number" + message.substring(message.indexOf(":")));
@@ -183,8 +187,12 @@ public abstract class Token extends Parser<String> {
             if (predicate.accept(ch))
                 return Success.of(String.valueOf(ch), input.subSequence(1, length));
 
-            return Failure.of(String.format("%s expected, but got '%s'",
-                    predicate.toString(), String.valueOf(ch))).asResult();
+            return Failure.of(getFailureMessage(ch)).asResult();
+        }
+
+        protected String getFailureMessage(char ch) {
+            return String.format("%s expected, but got '%s'",
+                    predicate.toString(), String.valueOf(ch));
         }
 
         @Override
@@ -322,7 +330,11 @@ public abstract class Token extends Parser<String> {
             if (result instanceof Failure)
                 return result;
 
-            return Success.of(null, null);
+            @SuppressWarnings("ConstantConditions")
+            Success success = (Success) result;
+            out.append(success.value);
+
+            return Success.of(out.toString(), success.rest);
         }
 
         private Result<String> nextResult(Iterator<Token> it, CharSequence input) {
@@ -353,13 +365,23 @@ public abstract class Token extends Parser<String> {
 
         @Override
         public Result<String> parse(CharSequence input) {
+            if (input == null)
+                return Failure.of("null").asResult();
+
+            if (input.length() == 0)
+                return Failure.of("empty").asResult();
+
             for (Token token : tokens) {
                 Result<String> result = token.parse(input);
                 if (result instanceof Success)
                     return result;
             }
 
-            return Failure.of("No match!").asResult();
+            return Failure.of(getFailureMessage(input)).asResult();
+        }
+
+        protected String getFailureMessage(CharSequence input) {
+            return this.toString() + " expected, but got \'" + input.charAt(0) + "'";
         }
 
         @Override

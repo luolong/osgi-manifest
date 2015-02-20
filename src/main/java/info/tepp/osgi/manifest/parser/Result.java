@@ -4,6 +4,7 @@ import info.tepp.osgi.manifest.parser.Tuple.Tuple2;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.ParseException;
 
 /**
  * Result of a parser.
@@ -20,6 +21,11 @@ public abstract class Result<T> {
         public Failure(String message) {
             assert message != null: "Message cannot be null!";
             this.message = message;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
         }
 
         public static Failure of(String message) {
@@ -59,6 +65,17 @@ public abstract class Result<T> {
         public int hashCode() {
             return message.hashCode();
         }
+
+        public static Failure of(Result<?> result) {
+            if (result instanceof Failure) {
+                return (Failure) result;
+            }
+            return null;
+        }
+
+        public ParseException asException() {
+            return new ParseException(message, 0);
+        }
     }
 
     public static class Success<T> extends Result<T> {
@@ -68,6 +85,11 @@ public abstract class Result<T> {
         public Success(T value, CharSequence rest) {
             this.value = value;
             this.rest = rest;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return true;
         }
 
         public static <T> Success<T> of(T value, CharSequence rest) {
@@ -107,4 +129,7 @@ public abstract class Result<T> {
             return result;
         }
     }
+
+    public abstract boolean isSuccess();
+
 }

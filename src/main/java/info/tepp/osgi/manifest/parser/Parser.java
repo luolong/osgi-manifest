@@ -17,9 +17,6 @@ public abstract class Parser<T> {
      */
     public abstract Result<T> parse(CharSequence input);
 
-    /** Parses positive integer numbers */
-    public static final Parser<Integer> NUMBER = Token.NUMBER.as(Integer.class);
-
     /**
      * Greedily parses rest of the input.
      */
@@ -134,6 +131,7 @@ public abstract class Parser<T> {
             };
         }
 
+        @SuppressWarnings("unused")
         public Parser<T> orElse(final T value) {
             final OptionalParser<T> parser = this;
             return new Parser<T>() {
@@ -199,6 +197,7 @@ public abstract class Parser<T> {
         return parser.as(Tuple.<L, R>Right());
     }
 
+    @SuppressWarnings("unused")
     public Parser<T> thenEof() {
         return then(EOF).as(Tuple.<T, Void>Left());
     }

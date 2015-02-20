@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SequenceParserTest {
 
-    Parser.TupleSequenceParser<String, Integer> parser = Token.Char('.').then(Parser.NUMBER);
+    Parser.TupleSequenceParser<String, Integer> parser = Token.Char('.').then(Token.NUMBER.as(Integer.class));
 
     @Test
     public void successfullyParsesNumberAndDot(){

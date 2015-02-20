@@ -31,7 +31,7 @@ public class AlphaTokenTest {
     }
 
     @Theory
-    public void parsesSngleAplhaChar(String alpha) {
+    public void parsesSingleAplhaChar(String alpha) {
         assertEquals(Success.of(alpha, "abc"), parser.parse(alpha + "abc"));
     }
 
