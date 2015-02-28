@@ -2,6 +2,7 @@ package info.tepp.osgi.manifest.parser;
 
 import info.tepp.osgi.manifest.parser.Tuple.Tuple2;
 
+import javax.annotation.Nonnull;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -26,6 +27,11 @@ public abstract class Result<T> {
         @Override
         public boolean isSuccess() {
             return false;
+        }
+
+        @Override
+        public Success<?> getSuccessOrThrow() throws ParseException {
+            throw new ParseException(message, 0);
         }
 
         public static Failure of(String message) {
@@ -66,11 +72,14 @@ public abstract class Result<T> {
             return message.hashCode();
         }
 
-        public static Failure of(Result<?> result) {
-            if (result instanceof Failure) {
+        @Nonnull
+        public static Failure of(@Nonnull Result<?> result) {
+            if (result instanceof Failure)
                 return (Failure) result;
-            }
-            return null;
+
+            throw new ClassCastException(
+                    Failure.class.getCanonicalName() + " expected, " +
+                    "but got " + result.getClass().getCanonicalName());
         }
 
         public ParseException asException() {
@@ -92,12 +101,21 @@ public abstract class Result<T> {
             return true;
         }
 
+        @Override
+        public Success<T> getSuccessOrThrow() throws ParseException {
+            return this;
+        }
+
         public static <T> Success<T> of(T value, CharSequence rest) {
             return new Success<T>(value, rest);
         }
 
         public static <L, R> Success<Tuple2<L, R>> of(L left, R right, CharSequence rest) {
             return Success.of(Tuple.of(left, right), rest);
+        }
+
+        public static <T> Success<T> of(Result<T> result) {
+            return (Success<T>) result;
         }
 
         @Override
@@ -131,5 +149,7 @@ public abstract class Result<T> {
     }
 
     public abstract boolean isSuccess();
+
+    public abstract Success<T> getSuccessOrThrow() throws ParseException;
 
 }

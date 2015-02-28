@@ -3,6 +3,7 @@ package info.tepp.osgi.manifest.parser;
 import info.tepp.osgi.manifest.parser.Result.Failure;
 import info.tepp.osgi.manifest.parser.Result.Success;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -148,6 +149,7 @@ public abstract class Token extends Parser<String> {
             this.token = token;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             if (input == null) return Failure.of("null").asResult();
@@ -176,6 +178,7 @@ public abstract class Token extends Parser<String> {
             this.predicate = predicate;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             if (input == null) return Failure.of("null").asResult();
@@ -211,6 +214,7 @@ public abstract class Token extends Parser<String> {
             this.pattern = pattern;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             if (input == null) return Failure.of("null").asResult();
@@ -243,6 +247,7 @@ public abstract class Token extends Parser<String> {
             this.token = token;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             StringBuilder output = new StringBuilder();
@@ -277,6 +282,7 @@ public abstract class Token extends Parser<String> {
             this.token = token;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             StringBuilder out = new StringBuilder();
@@ -311,6 +317,7 @@ public abstract class Token extends Parser<String> {
             this.tokens = tokens;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             StringBuilder out = new StringBuilder();
@@ -363,6 +370,7 @@ public abstract class Token extends Parser<String> {
             this.tokens = tokens;
         }
 
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             if (input == null)

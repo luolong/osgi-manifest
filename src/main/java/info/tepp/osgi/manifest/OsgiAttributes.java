@@ -83,6 +83,22 @@ public class OsgiAttributes extends Attributes {
     }
 
     /**
+     * Returns value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Version
+     * Bundle-Version} attribute.
+     */
+    public String getBundleVersion() {
+        return getValue(Name.Bundle_Version);
+    }
+
+    /**
+     * Sets value of the {@link info.tepp.osgi.manifest.OsgiAttributes.Name#Bundle_Version
+     * Bundle-Version} attribute.
+     */
+    public String setBundleVersion(String version) {
+        return put(Name.Bundle_Version, version);
+    }
+
+    /**
      * Represents name of an OSGi attribute.
      */
     public static class Name extends java.util.jar.Attributes.Name {

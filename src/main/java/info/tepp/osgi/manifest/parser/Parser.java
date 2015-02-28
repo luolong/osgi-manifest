@@ -3,6 +3,7 @@ package info.tepp.osgi.manifest.parser;
 import info.tepp.osgi.manifest.parser.Result.Failure;
 import info.tepp.osgi.manifest.parser.Result.Success;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -15,6 +16,7 @@ public abstract class Parser<T> {
     /**
      * Parses an input and returns a {@link info.tepp.osgi.manifest.parser.Result result}.
      */
+    @Nonnull
     public abstract Result<T> parse(CharSequence input);
 
     /**
@@ -22,6 +24,7 @@ public abstract class Parser<T> {
      */
     public static final Parser<String> REST = new RestParser();
     private static class RestParser extends Parser<String> {
+        @Nonnull
         @Override
         public Result<String> parse(CharSequence input) {
             return Success.of(input.toString(), "");
@@ -29,6 +32,7 @@ public abstract class Parser<T> {
     }
 
     public static final Parser<Void> EOF = new Parser<Void>() {
+        @Nonnull
         @Override
         @SuppressWarnings("unchecked")
         public Result<Void> parse(CharSequence input) {
@@ -55,6 +59,7 @@ public abstract class Parser<T> {
             this.right = right;
         }
 
+        @Nonnull
         @Override
         public Result<Tuple.Tuple2<L, R>> parse(CharSequence input) {
             Result<L> leftResult = left.parse(input);
@@ -76,6 +81,7 @@ public abstract class Parser<T> {
         public <T> Parser<T> as(final BiFunction<L, R, T> func) {
             final TupleSequenceParser<L, R> parser = this;
             return new Parser<T>() {
+                @Nonnull
                 @Override
                 public Result<T> parse(CharSequence input) {
                     Result<Tuple.Tuple2<L, R>> result = parser.parse(input);
@@ -109,6 +115,7 @@ public abstract class Parser<T> {
             this.parser = parser;
         }
 
+        @Nonnull
         @Override
         public Result<Maybe<T>> parse(CharSequence input) {
             Result<T> result = parser.parse(input);
@@ -122,6 +129,7 @@ public abstract class Parser<T> {
         public <R> OptionalParser<R> as(final Function<T, R> func) {
             final OptionalParser<T> optional = this;
             return new OptionalParser<R>(null) {
+                @Nonnull
                 @Override
                 public Result<Maybe<R>> parse(CharSequence input) {
                     Result<Maybe<T>> result = optional.parse(input);
@@ -135,6 +143,7 @@ public abstract class Parser<T> {
         public Parser<T> orElse(final T value) {
             final OptionalParser<T> parser = this;
             return new Parser<T>() {
+                @Nonnull
                 @Override
                 public Result<T> parse(CharSequence input) {
                     Result<Maybe<T>> result = parser.parse(input);
@@ -151,6 +160,7 @@ public abstract class Parser<T> {
     public <R> Parser<R> as(final Function<T, R> func) {
         final Parser<T> parser = this;
         return new Parser<R>() {
+            @Nonnull
             @Override
             public Result<R> parse(CharSequence input) {
                 Result<T> result = parser.parse(input);

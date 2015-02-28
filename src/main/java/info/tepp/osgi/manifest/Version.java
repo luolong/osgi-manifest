@@ -1,17 +1,16 @@
 package info.tepp.osgi.manifest;
 
-import info.tepp.osgi.manifest.parser.Parser;
 import info.tepp.osgi.manifest.parser.Result;
-import info.tepp.osgi.manifest.parser.Result.Failure;
 import info.tepp.osgi.manifest.parser.Result.Success;
+import info.tepp.osgi.manifest.parser.VersionParser;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.ParseException;
 
-import static info.tepp.osgi.manifest.parser.Parser.Right;
-import static info.tepp.osgi.manifest.parser.Token.*;
-
+/**
+ * Version of a bundle or a package
+ */
 public class Version implements Comparable<Version> {
 
     public final int major;
@@ -107,25 +106,21 @@ public class Version implements Comparable<Version> {
     }
 
     @SuppressWarnings("unused")
-    private static @Nonnull Version valueOf(@Nonnull Major major, @Nonnull Minor minor, @Nonnull Micro micro, @Nonnull Qualifier qualifier) {
+    public static @Nonnull Version valueOf(@Nonnull Major major, @Nonnull Minor minor, @Nonnull Micro micro, @Nonnull Qualifier qualifier) {
         return new Version(major.intValue(), minor.intValue(), micro.intValue(), qualifier.toString());
     }
 
-    public static @Nonnull Version parseVersion(@Nonnull String versionString) throws ParseException {
-        Success<Major> major = Major.parseMajor(versionString);
-        if (major.rest.length() == 0)
-            return Version.valueOf(major.value);
+    public static @Nonnull Version parseVersion(@Nonnull String versionString) throws VersionFormatException {
+        try {
+            Result<Version> result = new VersionParser().parse(versionString);
+            Success<Version> success = result.getSuccessOrThrow();
+            if (success.rest.length() > 0)
+                throw new VersionFormatException("Unexpected characters: " + success.rest.toString());
 
-        Success<Minor> minor = Minor.parseMinor(major.rest);
-        if (minor.rest.length() == 0)
-            return Version.valueOf(major.value, minor.value);
-
-        Success<Micro> micro = Micro.parseMicro(minor.rest);
-        if (micro.rest.length() == 0)
-            return Version.valueOf(major.value, minor.value, micro.value);
-
-        Success<Qualifier> qualifier = Qualifier.parseQualifier(micro.rest);
-        return Version.valueOf(major.value, minor.value, micro.value, qualifier.value);
+            return success.value;
+        } catch (ParseException e) {
+            throw  new VersionFormatException(e.getMessage());
+        }
     }
 
     public static final class Major extends Number {
@@ -162,17 +157,6 @@ public class Version implements Comparable<Version> {
         @Override
         public double doubleValue() {
             return value;
-        }
-
-        public static Success<Major> parseMajor(CharSequence input) throws ParseException {
-            Parser<Major> parser = NUMBER.as(Major.class);
-            Result<Major> result = parser.parse(input);
-            if (result instanceof Success) {
-                return (Success<Major>) result;
-            }
-
-            Failure failure = Failure.of(result);
-            throw failure.asException();
         }
     }
 
@@ -211,21 +195,9 @@ public class Version implements Comparable<Version> {
         public double doubleValue() {
             return value;
         }
-
-        public static @Nonnull Success<Minor> parseMinor(@Nonnull CharSequence input) throws ParseException {
-            Parser<Minor> parser = Right(Char('.').then(NUMBER.as(Minor.class)));
-            Result<Minor> result = parser.parse(input);
-            if (result instanceof Success) {
-                return (Success<Minor>) result;
-            }
-
-            Failure failure = Failure.of(result);
-            throw failure.asException();
-        }
     }
 
     public static final class Micro extends Number {
-
         @SuppressWarnings("unused")
         public static @Nonnull Micro valueOf(int intValue) {
             return new Micro(intValue);
@@ -260,21 +232,9 @@ public class Version implements Comparable<Version> {
         public double doubleValue() {
             return value;
         }
-
-        public static @Nonnull Success<Micro> parseMicro(@Nonnull CharSequence input) throws ParseException {
-            Parser<Micro> parser = Right(Char('.').then(NUMBER.as(Micro.class)));
-            Result<Micro> result = parser.parse(input);
-            if (result instanceof Success) {
-                return (Success<Micro>) result;
-            }
-
-            Failure failure = Failure.of(result);
-            throw failure.asException();
-        }
     }
 
     public static final class Qualifier implements CharSequence {
-
         @SuppressWarnings("unused")
         public static @Nonnull Qualifier valueOf(@Nonnull String value) {
             return new Qualifier(value);
@@ -304,16 +264,11 @@ public class Version implements Comparable<Version> {
         public @Nonnull String toString() {
             return value;
         }
+    }
 
-        public static @Nonnull Success<Qualifier> parseQualifier(@Nonnull CharSequence input) throws ParseException {
-            Parser<Qualifier> parser = Right(Char('.').then(QUALIFIER.as(Qualifier.class)));
-            Result<Qualifier> result = parser.parse(input);
-            if (result instanceof Success) {
-                return (Success<Qualifier>) result;
-            }
-
-            Failure failure = Failure.of(result);
-            throw failure.asException();
+    public static final class VersionFormatException extends NumberFormatException {
+        public VersionFormatException(String message) {
+            super(message);
         }
     }
 }
