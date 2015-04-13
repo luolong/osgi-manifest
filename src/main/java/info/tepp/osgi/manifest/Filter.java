@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static info.tepp.osgi.manifest.Filter.FilterType.*;
 import static java.util.Collections.unmodifiableList;
 
 public abstract class Filter {
 
+    public static And And(Filter first, Filter second, Filter ... filters) {
+        return new And(asList(first, second, filters));
+    }
+
     public static class And extends Filter {
         public final List<Filter> filterList;
-
-        public And(Filter ... filters) {
-            this(Arrays.asList(filters));
-        }
 
         public And(List<Filter> filterList) {
             this.filterList = unmodifiableList(
@@ -29,12 +30,13 @@ public abstract class Filter {
             return string + ")";
         }
     }
+
+    public static Or Or(Filter first, Filter second, Filter ... filters){
+        return new Or(asList(first, second, filters));
+    }
+
     public static class Or extends Filter {
         public final List<Filter> filterList;
-
-        public Or(Filter ... filters) {
-            this(Arrays.asList(filters));
-        }
 
         public Or(List<Filter> filterList) {
             this.filterList = unmodifiableList(
@@ -50,6 +52,10 @@ public abstract class Filter {
             return s + ")";
         }
     }
+
+    public static Not Not(Filter filter) {
+        return new Not(filter);
+    }
     public static class Not extends Filter {
         public final Filter filter;
         public Not(Filter filter) {
@@ -63,6 +69,26 @@ public abstract class Filter {
     }
 
     public static abstract class Operation extends Filter {}
+
+    public static Operation Eq(String attr, String value) {
+        return new Simple(attr, equal, value);
+    }
+
+    public static Operation Approx(String attr, String value) {
+        return new Simple(attr, approx, value);
+    }
+
+    public static Operation GreaterEq(String attr, String value) {
+        return new Simple(attr, greaterEq, value);
+    }
+
+    public static Operation LessEq(String attr, String value) {
+        return new Simple(attr, lessEq, value);
+    }
+
+    public static Operation Has(String attr) {
+        return new Simple(attr, equal, "*");
+    }
 
     public static class Simple extends Operation {
         public final String attr;
@@ -106,6 +132,14 @@ public abstract class Filter {
 
             throw new IllegalArgumentException(operator);
         }
+    }
+
+    private static <T> List<T> asList(T t1, T t2, T[] rest) {
+        ArrayList<T> ts = new ArrayList<T>(rest.length + 2);
+        ts.add(t1);
+        ts.add(t2);
+        ts.addAll(Arrays.asList(rest));
+        return ts;
     }
 
 }
