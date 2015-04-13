@@ -402,7 +402,7 @@ public class OsgiAttributes extends Attributes {
          *
          * <p>Specifies that a bundle provides a set of capabilities<!--, see Dependencies on page 32-->.</p>
          */
-        public static final Name Provided_Capability = new Name("Provided-Capability");
+        public static final Name Provide_Capability = new Name("Provide-Capability");
 
         /**
          * OSGi bundle attribute - dependency of this bundle.
@@ -423,16 +423,15 @@ public class OsgiAttributes extends Attributes {
          * capability<!--, see Dependencies on page 32-->.</p>
          *
          * @see #Bundle_RequiredExecutionEnvironment
-         * @see #Provided_Capability
+         * @see #Provide_Capability
          * @see #Import_Package
          */
         public static final Name Require_Capability = new Name("Require-Capability");
 
+
         /*
          * Eclipse Foundation namespace header names.
          * ========================================== */
-
-
 
         public static final Name Eclipse_BuddyPolicy    = new Name("Eclipse-BuddyPolicy");
 
@@ -440,11 +439,11 @@ public class OsgiAttributes extends Attributes {
         public static final Name Eclipse_ExtensibleAPI  = new Name("Eclipse-ExtensibleAPI");
         public static final Name Eclipse_PlatformFilter = new Name("Eclipse-PlatformFilter");
         public static final Name Eclipse_RegisterBuddy  = new Name("Eclipse-RegisterBuddy");
+
+
         /*
          * SpringSource namespace header names.
          * ==================================== */
-
-
 
         public static final Name Import_Bundle                    = new Name("Import-Bundle");
 
@@ -454,6 +453,8 @@ public class OsgiAttributes extends Attributes {
         public static final Name Web_ContextPath                  = new Name("Web-ContextPath");
         public static final Name Web_DispatcherServletUrlPatterns = new Name("Web-DispatcherServletUrlPatterns");
         public static final Name Web_FilterMappings               = new Name("Web-FilterMappings");
+
+
         /*
          * aQute namespace header names.
          * ==================================== */

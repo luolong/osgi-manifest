@@ -69,4 +69,16 @@ public class SimpleOsgiAttributesTest {
         assertEquals("OSGi Alliance", attributes.getBundleVendor());
     }
 
+    @Test
+    public void canGetBundleVersion() {
+        attributes.put(Bundle_Version, "1.2");
+        assertEquals("1.2", attributes.getBundleVersion());
+    }
+
+    @Test
+    public void canSetBundleVersion() {
+        attributes.setBundleVersion("1.2");
+        assertEquals("1.2", attributes.getBundleVersion());
+    }
+
 }
